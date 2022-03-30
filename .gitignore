@@ -1,0 +1,6 @@
+#environmenta files
+node_modules
+.env
+truffle-congfig.js
+
+
