@@ -2,20 +2,39 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RedMarketplace {
+    using Counters for Counters.Counter;
+
+    IERC20 redToken;
     struct ListingItem {
-        // uint256 id;
+        uint256 itemId;
         address tokenAddress;
         uint256 tokenId;
-        address seller;
+        address payable owner;
         uint256 askingPrice;
         bool isForSale;
     }
 
-    // ListingItem[] public items;
-    uint256 private _listingId = 0;
+    struct Offer {
+        uint256 offerId;
+        address creator;
+        uint256 itemId;
+        uint256 amount;
+        bool isOfferOpen;
+    }
+
+    constructor() {
+        redToken = IERC20(0x2D001A055B29504D6C029fd4f46470b18D74bd17); // Token Address
+    }
+
+    Counters.Counter private _listingIdCounter;
+    Counters.Counter private _offerIdCounter;
     mapping(uint256 => ListingItem) private items;
+    mapping(uint256 => Offer) private offers;
 
     event itemAdded();
     event itemSold();
@@ -42,19 +61,69 @@ contract RedMarketplace {
         OnlyItemOwner(tokenAddress, tokenId)
         HasTransferApproval(tokenAddress, tokenId)
     {
+        require(askingPrice > 0, "Price must be at least 1 RED");
+        uint256 listingId = _listingIdCounter.current();
         ListingItem memory listing = ListingItem(
+            listingId,
             tokenAddress,
             tokenId,
-            msg.sender,
+            payable(msg.sender),
             askingPrice,
             isForSale
         );
-        items[_listingId] = listing;
-        _listingId++;
+        items[listingId] = listing;
+        _listingIdCounter.increment();
     }
 
-    function createOffer(uint256 listingId) external {
+    function cancelListing(uint256 listingId) external {
+        require(items[listingId].owner == msg.sender, "Unauthorized user");
+        items[listingId].isForSale = false;
+    }
+
+    function createOffer(uint256 listingId, uint256 amount) external {
         ListingItem storage listing = items[listingId];
-        require(listing.isForSale, "Listing is NOT accepting offer");
+        require(listing.isForSale, "Listed item is NOT accepting offers");
+        require(
+            redToken.balanceOf(msg.sender) >= listing.askingPrice,
+            "Insufficient RED token balance"
+        );
+        uint256 offerId = _offerIdCounter.current();
+        Offer memory offer = Offer(
+            offerId,
+            msg.sender,
+            listingId,
+            amount,
+            true
+        );
+        offers[offerId] = offer;
+        redToken.approve(items[listingId].owner, amount);
+    }
+
+    function cancelOffer(uint256 offerId) external {
+        require(offers[offerId].creator == msg.sender, "Unauthorized user");
+        offers[offerId].isOfferOpen = false;
+    }
+
+    function getAllowance(address offerCreator) public view returns (uint256) {
+        return redToken.allowance(offerCreator, msg.sender);
+    }
+
+    function acceptOffer(address _nftContract, uint256 offerId) external {
+        Offer storage offer = offers[offerId];
+        ListingItem storage listing = items[offer.itemId];
+        require(listing.owner == msg.sender, "Unauthorized user");
+        require(offer.isOfferOpen, "Offer is closed");
+        require(
+            offer.amount >= getAllowance(offer.creator),
+            "Token transfer not approved by the offer creator"
+        );
+
+        redToken.transfer(msg.sender, offer.amount);
+        IERC721(_nftContract).safeTransferFrom(
+            msg.sender,
+            offer.creator,
+            listing.tokenId
+        );
+        items[offer.itemId].owner = payable(offer.creator);
     }
 }
