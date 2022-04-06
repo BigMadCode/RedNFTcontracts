@@ -10,6 +10,8 @@ contract RedMarketplace {
     using Counters for Counters.Counter;
 
     IERC20 redToken;
+    address redMinterAddress = 0x2D001A055B29504D6C029fd4f46470b18D74bd17;
+
     struct ListingItem {
         uint256 itemId;
         address tokenAddress;
@@ -17,6 +19,7 @@ contract RedMarketplace {
         address payable owner;
         uint256 askingPrice;
         bool isForSale;
+        uint256 royalty;
     }
 
     struct Offer {
@@ -55,7 +58,8 @@ contract RedMarketplace {
         uint256 tokenId,
         address tokenAddress,
         uint256 askingPrice,
-        bool isForSale
+        bool isForSale,
+        address owner
     )
         external
         OnlyItemOwner(tokenAddress, tokenId)
@@ -63,13 +67,18 @@ contract RedMarketplace {
     {
         require(askingPrice > 0, "Price must be at least 1 RED");
         uint256 listingId = _listingIdCounter.current();
+        uint256 royalty = 10;
+        if (msg.sender == redMinterAddress) {
+            royalty = 30;
+        }
         ListingItem memory listing = ListingItem(
             listingId,
             tokenAddress,
             tokenId,
-            payable(msg.sender),
+            payable(owner),
             askingPrice,
-            isForSale
+            isForSale,
+            royalty
         );
         items[listingId] = listing;
         _listingIdCounter.increment();
@@ -96,7 +105,9 @@ contract RedMarketplace {
             true
         );
         offers[offerId] = offer;
-        redToken.approve(items[listingId].owner, amount);
+        uint256 royalty = (amount * listing.royalty) / 100;
+        redToken.approve(items[listingId].owner, amount - royalty);
+        redToken.approve(redMinterAddress, royalty);
     }
 
     function cancelOffer(uint256 offerId) external {
@@ -117,8 +128,9 @@ contract RedMarketplace {
             offer.amount >= getAllowance(offer.creator),
             "Token transfer not approved by the offer creator"
         );
-
-        redToken.transfer(msg.sender, offer.amount);
+        uint256 royalty = (offer.amount * listing.royalty) / 100;
+        redToken.transfer(msg.sender, offer.amount - royalty);
+        redToken.transfer(redMinterAddress, royalty);
         IERC721(_nftContract).safeTransferFrom(
             msg.sender,
             offer.creator,
