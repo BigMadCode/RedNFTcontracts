@@ -10,7 +10,7 @@ contract RedMarketplace {
     using Counters for Counters.Counter;
 
     IERC20 redToken;
-    address redMinterAddress = 0x2D001A055B29504D6C029fd4f46470b18D74bd17;
+    address redMinterAddress = 0x2D001A055B29504D6C029fd4f46470b18D74bd17; // TODO
 
     struct ListingItem {
         uint256 itemId;
