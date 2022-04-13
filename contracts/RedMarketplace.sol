@@ -31,7 +31,7 @@ contract RedMarketplace {
     }
 
     constructor() {
-        redToken = IERC20(0x2D001A055B29504D6C029fd4f46470b18D74bd17); // Token Address
+        redToken = IERC20(0x223153FE0ACcDC98f997d71a04ca50cf2874Ce94); // Token Address
     }
 
     Counters.Counter private _listingIdCounter;
