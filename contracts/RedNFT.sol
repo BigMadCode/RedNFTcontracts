@@ -27,6 +27,13 @@ contract RedNFT is ERC721, ERC721URIStorage, AccessControl {
         _setTokenURI(tokenId, uri);
     }
 
+    function safeMintByUser(string memory uri) public {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, uri);
+    }
+
     // The following functions are overrides required by Solidity.
 
     function _burn(uint256 tokenId)

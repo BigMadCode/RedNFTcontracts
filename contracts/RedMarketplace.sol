@@ -84,6 +84,13 @@ contract RedMarketplace {
         _listingIdCounter.increment();
     }
 
+    function updateAskingPrice(uint256 listingId, uint256 askingPrice)
+        external
+    {
+        require(items[listingId].owner == msg.sender, "Unauthorized user");
+        items[listingId].askingPrice = askingPrice;
+    }
+
     function cancelListing(uint256 listingId) external {
         require(items[listingId].owner == msg.sender, "Unauthorized user");
         items[listingId].isForSale = false;
@@ -137,5 +144,29 @@ contract RedMarketplace {
             listing.tokenId
         );
         items[offer.itemId].owner = payable(offer.creator);
+    }
+
+    function buyNow(
+        address _nftContract,
+        uint256 listingId,
+        uint256 amount
+    ) external {
+        ListingItem storage listing = items[listingId];
+        require(listing.isForSale, "Listed item is NOT for sale");
+        require(amount >= listing.askingPrice, "Insufficient RED token amount");
+        require(
+            redToken.balanceOf(msg.sender) >= listing.askingPrice,
+            "Insufficient RED token balance"
+        );
+        uint256 royalty = (listing.askingPrice * listing.royalty) / 100;
+        redToken.transfer(listing.owner, listing.askingPrice - royalty);
+        redToken.transfer(redMinterAddress, royalty);
+
+        IERC721(_nftContract).safeTransferFrom(
+            listing.owner,
+            msg.sender,
+            listing.tokenId
+        );
+        items[listingId].owner = payable(msg.sender);
     }
 }
