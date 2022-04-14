@@ -1,5 +1,6 @@
 const Marketplace = artifacts.require('RedMarketplace');
 const Token = artifacts.require('Red');
+const NFTContract = artifacts.require('RedNFT');
 
 const chai = require('./setupchai.js');
 const BN = web3.utils.BN;
@@ -14,31 +15,23 @@ contract('Marketplace Test', function (accounts) {
 		this.redMarketplace = await Marketplace.new(process.env.RED_TOKEN);
 	});
 
-	it(' #1 Make sure this is  RED token', async () => {
-		let instance = this.myToken;
-		let totalSupply = await instance.totalSupply();
-		let name = await instance.name();
-		let symbol = await instance.symbol();
-		let decimal = await instance.decimals();
-		//let balance = await instance.balanceOf(accounts[0]);
-		//assert.equal(balance.valueOf(), initialSupply.valueOf(), "The balance was not the same");
-		console.log(totalSupply.toString());
-		console.log(name.toString());
-		console.log(symbol.toString());
-		console.log(decimal.toString());
-		expect(instance.balanceOf(deployerAccount)).to.eventually.be.a.bignumber.equal(totalSupply);
+	it(' #1 Make sure contract deployed correctly', async () => {
+		let instance = await this.redMarketplace;
+		let redminterAddress = 0xc76ebce384181d22de0d5e8f9552c0bbbd2e95cc;
+		let tokeAddress = await instance.redToken;
+		expect(instance.redminterAddress).to.be.a.bignumber.equal(redminterAddress);
+		expect(instance.redToken).to.be.a.bignumber.equal(tokeAddress);
 	});
 
-	it('all tokens should be in my account', async () => {
-		let instance = this.myToken;
-		let totalSupply = await instance.totalSupply();
-		//let balance = await instance.balanceOf(accounts[0]);
-		//assert.equal(balance.valueOf(), initialSupply.valueOf(), "The balance was not the same");
-		expect(instance.balanceOf(deployerAccount)).to.eventually.be.a.bignumber.equal(totalSupply);
+	it('should list token lisitngs', async () => {
+		let instance = this.redMarketplace;
+		let nftInstance = await NFTContract.deployed();
+		let redInstance = await Token.deployed();
+		await expect();
 	});
 
 	it('is not possible to send more tokens than available in total', async () => {
-		let instance = this.myToken;
+		let instance = this.redMarketplace;
 		let balanceOfDeployer = await instance.balanceOf(deployerAccount);
 
 		expect(instance.transfer(recipient, new BN(balanceOfDeployer + 1))).to.eventually.be.rejected;
