@@ -136,8 +136,12 @@ contract RedMarketplace {
             "Token transfer not approved by the offer creator"
         );
         uint256 royalty = (offer.amount * listing.royalty) / 100;
-        redToken.transfer(msg.sender, offer.amount - royalty);
-        redToken.transfer(redMinterAddress, royalty);
+        redToken.transferFrom(
+            offer.creator,
+            listing.owner,
+            offer.amount - royalty
+        );
+        redToken.transferFrom(offer.creator, redMinterAddress, royalty);
         IERC721(_nftContract).safeTransferFrom(
             msg.sender,
             offer.creator,
@@ -159,8 +163,12 @@ contract RedMarketplace {
             "Insufficient RED token balance"
         );
         uint256 royalty = (listing.askingPrice * listing.royalty) / 100;
-        redToken.transfer(listing.owner, listing.askingPrice - royalty);
-        redToken.transfer(redMinterAddress, royalty);
+        redToken.transferFrom(
+            msg.sender,
+            listing.owner,
+            listing.askingPrice - royalty
+        );
+        redToken.transferFrom(msg.sender, redMinterAddress, royalty);
 
         IERC721(_nftContract).safeTransferFrom(
             listing.owner,
