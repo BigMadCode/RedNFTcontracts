@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RedGovernance {
     IERC20 redToken;
-    address admin = 0x2D001A055B29504D6C029fd4f46470b18D74bd17; // TODO
+    address admin = 0xC76EBCe384181d22de0d5E8f9552c0bbbd2E95cc; // TODO
     uint256 votingFee = 100 * 10**18; // TODO
     uint256 votingReward = 15 * 10**18; // TODO
     uint256 internal rewardPerHour = 1000; // TODO
@@ -26,8 +26,8 @@ contract RedGovernance {
 
     mapping(address => StakingSummary) private StakingInfo;
 
-    constructor() {
-        redToken = IERC20(0x2D001A055B29504D6C029fd4f46470b18D74bd17); // Token Address
+    constructor(address redTokenAddress) {
+        redToken = IERC20(redTokenAddress); // Token Address
     }
 
     function vote() external returns (bool) {
