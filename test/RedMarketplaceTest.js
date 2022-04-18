@@ -11,8 +11,8 @@ require("dotenv").config({ path: "../.env" });
 contract("Marketplace Test", function (accounts) {
   const [deployerAccount, recipient, anotherAccount] = accounts;
 
-  beforeEach(async () => {
-    this.redMarketplace = await Marketplace.deployed(123); //new(process.env.RED_TOKEN);
+  before(async () => {
+    this.redMarketplace = await Marketplace.deployed(); //new(process.env.RED_TOKEN);
   });
 
   it(" #1 Make sure contract deployed correctly", async () => {
@@ -32,18 +32,20 @@ contract("Marketplace Test", function (accounts) {
     let NFT = await expect(
       nftInstance.safeMint(recipient, "www.redeyedcollection.com/")
     ).to.eventually.be.fulfilled;
-    let nftTokenId = await NFT.logs[0].args.tokenId.toString();
-    //console.log(NFT);
+    let nftTokenId = NFT.logs[0].args.tokenId.toString();
+    let nftAddress = NFT.logs[0].address.toString();
     let balanceRecipient1 = await nftInstance.balanceOf(recipient);
+
     console.log(nftTokenId);
-    console.log(NFT.address);
+    console.log(nftAddress);
+
     console.log(
       balanceRecipient1.toString() + " this is balance of Recipient1"
     );
     expect(
       instance.listItem(
         nftTokenId,
-        NFT.address,
+        nftAddress,
         askingPrice,
         1,
         recipient.address
