@@ -41,8 +41,9 @@ contract RedMarketplace {
 
     event itemAdded(ListingItem item);
     event listingUpdated(ListingItem item);
-    event itemSold();
+    event itemSold(ListingItem item);
     event offerCreated(Offer offer);
+    event offerAccepted(Offer offer);
     event offerCancelled(Offer offer);
 
     modifier OnlyItemOwner(address tokenAddress, uint256 tokenId) {
@@ -125,7 +126,10 @@ contract RedMarketplace {
         );
         offers[offerId] = offer;
         //uint256 royalty = (amount * listing.royalty) / 100;
-        require(redToken.allowance(offer.creator, address(this)) > amount, "insufficient allowance, re-initialize wallet");
+        require(
+            redToken.allowance(offer.creator, address(this)) > amount,
+            "insufficient allowance, re-initialize wallet"
+        );
         //redToken.approve(redMinterAddress, royalty);
         emit offerCreated(offer);
     }
@@ -137,7 +141,7 @@ contract RedMarketplace {
     }
 
     function getAllowance(address offerCreator) public view returns (uint256) {
-        return redToken.allowance(offerCreator, msg.sender);
+        return redToken.allowance(offerCreator, address(this));
     }
 
     function acceptOffer(address _nftContract, uint256 offerId) external {
@@ -146,7 +150,7 @@ contract RedMarketplace {
         require(listing.owner == msg.sender, "Unauthorized user");
         require(offer.isOfferOpen, "Offer is closed");
         require(
-            offer.amount >= getAllowance(offer.creator),
+            offer.amount <= getAllowance(offer.creator),
             "Token transfer not approved by the offer creator"
         );
         uint256 royalty = (offer.amount * listing.royalty) / 100;
@@ -155,13 +159,15 @@ contract RedMarketplace {
             listing.owner,
             offer.amount - royalty
         );
-        redToken.transferFrom(offer.creator, redMinterAddress, royalty);
+        redToken.transferFrom(offer.creator, address(this), royalty);
         IERC721(_nftContract).safeTransferFrom(
             msg.sender,
             offer.creator,
             listing.tokenId
         );
         items[offer.itemId].owner = payable(offer.creator);
+        emit itemSold(items[offer.itemId]);
+        emit offerAccepted(offers[offerId]);
     }
 
     function buyNow(
@@ -182,7 +188,7 @@ contract RedMarketplace {
             listing.owner,
             listing.askingPrice - royalty
         );
-        redToken.transferFrom(msg.sender, redMinterAddress, royalty);
+        redToken.transferFrom(msg.sender, address(this), royalty);
 
         IERC721(_nftContract).safeTransferFrom(
             listing.owner,
@@ -190,6 +196,7 @@ contract RedMarketplace {
             listing.tokenId
         );
         items[listingId].owner = payable(msg.sender);
+        emit itemSold(items[listingId]);
     }
 
     function getListingById(uint256 listingId)
