@@ -10,7 +10,7 @@ contract RedMarketplace {
     using Counters for Counters.Counter;
 
     IERC20 redToken;
-    address redMinterAddress = 0xC76EBCe384181d22de0d5E8f9552c0bbbd2E95cc; // TODO
+    address redMinterAddress = 0x01Dc00E095788275224187812B3f92f5eF8dD069; // TODO
 
     struct ListingItem {
         uint256 itemId;
@@ -29,6 +29,8 @@ contract RedMarketplace {
         uint256 amount;
         bool isOfferOpen;
     }
+
+    event ItemListed(ListingItem item);
 
     constructor(address redTokenAddress) {
         redToken = IERC20(redTokenAddress); // Token Address
@@ -50,9 +52,16 @@ contract RedMarketplace {
 
     modifier HasTransferApproval(address tokenAddress, uint256 tokenId) {
         IERC721 nftContract = IERC721(tokenAddress);
-        require(nftContract.getApproved(tokenId) == msg.sender);
+        require(nftContract.getApproved(tokenId) == address(this));
         _;
     }
+
+    function getRedMinterAddress() public view returns (address) {
+        return redMinterAddress;
+    }
+
+    //
+    event appr2(address app);
 
     function listItem(
         uint256 tokenId,
@@ -82,12 +91,16 @@ contract RedMarketplace {
         );
         items[listingId] = listing;
         _listingIdCounter.increment();
+        // IERC721 nftContract = IERC721(tokenAddress);
+        // emit appr2(nftContract.getApproved(tokenId));
+        emit ItemListed(listing);
     }
 
     function updateAskingPrice(uint256 listingId, uint256 askingPrice)
         external
     {
         require(items[listingId].owner == msg.sender, "Unauthorized user");
+        require(askingPrice > 0, "Price must be at least 1 RED");
         items[listingId].askingPrice = askingPrice;
     }
 
@@ -176,5 +189,13 @@ contract RedMarketplace {
             listing.tokenId
         );
         items[listingId].owner = payable(msg.sender);
+    }
+
+    function getListingById(uint256 listingId)
+        public
+        view
+        returns (ListingItem memory)
+    {
+        return items[listingId];
     }
 }

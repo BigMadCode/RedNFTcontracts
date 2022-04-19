@@ -6,12 +6,13 @@ require("dotenv").config({ path: "../.env" });
 // const BN = web3.utils.BN;
 
 module.exports = async function (deployer) {
-  deployer.deploy(RedNFT);
   deployer.deploy(Red, process.env.INITIAL_TOKENS).then((instanceRed) => {
     console.log("RED address " + instanceRed.address);
-    return (
-      deployer.deploy(RedMarketplace, instanceRed.address) &&
-      deployer.deploy(RedGovernance, instanceRed.address)
-    );
+    return deployer
+      .deploy(RedMarketplace, instanceRed.address)
+      .then((instanceMP) => {
+        console.log("Marketplace address " + instanceMP.address);
+        return deployer.deploy(RedNFT, instanceMP.address);
+      });
   });
 };

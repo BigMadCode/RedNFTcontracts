@@ -11,10 +11,12 @@ contract RedNFT is ERC721, ERC721URIStorage, AccessControl {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
+    address marketplaceAddress;
 
-    constructor() ERC721("RedNFT", "NFT") {
+    constructor(address marketAddress) ERC721("RedNFT", "NFT") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
+        marketplaceAddress = marketAddress;
     }
 
     function safeMint(address to, string memory uri)
@@ -25,6 +27,7 @@ contract RedNFT is ERC721, ERC721URIStorage, AccessControl {
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+        _approve(marketplaceAddress, tokenId);
     }
 
     function safeMintByUser(string memory uri) public {
@@ -32,6 +35,7 @@ contract RedNFT is ERC721, ERC721URIStorage, AccessControl {
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
+        _approve(marketplaceAddress, tokenId);
     }
 
     // The following functions are overrides required by Solidity.
