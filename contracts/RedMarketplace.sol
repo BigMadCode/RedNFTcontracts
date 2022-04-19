@@ -30,8 +30,6 @@ contract RedMarketplace {
         bool isOfferOpen;
     }
 
-    event ItemListed(ListingItem item);
-
     constructor(address redTokenAddress) {
         redToken = IERC20(redTokenAddress); // Token Address
     }
@@ -41,7 +39,7 @@ contract RedMarketplace {
     mapping(uint256 => ListingItem) private items;
     mapping(uint256 => Offer) private offers;
 
-    event itemAdded();
+    event itemAdded(ListingItem item);
     event itemSold();
 
     modifier OnlyItemOwner(address tokenAddress, uint256 tokenId) {
@@ -59,9 +57,6 @@ contract RedMarketplace {
     function getRedMinterAddress() public view returns (address) {
         return redMinterAddress;
     }
-
-    //
-    event appr2(address app);
 
     function listItem(
         uint256 tokenId,
@@ -91,9 +86,7 @@ contract RedMarketplace {
         );
         items[listingId] = listing;
         _listingIdCounter.increment();
-        // IERC721 nftContract = IERC721(tokenAddress);
-        // emit appr2(nftContract.getApproved(tokenId));
-        emit ItemListed(listing);
+        emit itemAdded(listing);
     }
 
     function updateAskingPrice(uint256 listingId, uint256 askingPrice)

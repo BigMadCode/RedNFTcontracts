@@ -93,17 +93,17 @@ contract("Marketplace Test", function (accounts) {
     expect(updatedItem.askingPrice).to.be.equal("20");
   });
 
-  // it("#4 it is possible to make an offer", async () => {
-  //   let instance = this.redMarketplace;
-  //   let balanceOfDeployer = await instance.balanceOf(deployerAccount);
+  it("#4 it is possible to make an offer", async () => {
+    let instance = this.redMarketplace;
+    let balanceOfDeployer = await instance.balanceOf(deployerAccount);
 
-  //   expect(instance.transfer(recipient, new BN(balanceOfDeployer + 1))).to
-  //     .eventually.be.rejected;
+    expect(instance.transfer(recipient, new BN(balanceOfDeployer + 1))).to
+      .eventually.be.rejected;
 
-  //   expect(
-  //     instance.balanceOf(deployerAccount)
-  //   ).to.eventually.be.a.bignumber.equal(balanceOfDeployer);
-  // });
+    expect(
+      instance.balanceOf(deployerAccount)
+    ).to.eventually.be.a.bignumber.equal(balanceOfDeployer);
+  });
 
   // it('#4 it is possible to cancel offer', async () => {
   // 	let instance = this.myToken;
