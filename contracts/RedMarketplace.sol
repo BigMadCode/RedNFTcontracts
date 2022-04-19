@@ -40,7 +40,7 @@ contract RedMarketplace {
     mapping(uint256 => Offer) private offers;
 
     event itemAdded(ListingItem item);
-    event listingCancelled(ListingItem item);
+    event listingUpdated(ListingItem item);
     event itemSold();
     event offerCreated(Offer offer);
     event offerCancelled(Offer offer);
@@ -100,10 +100,12 @@ contract RedMarketplace {
         items[listingId].askingPrice = askingPrice;
     }
 
-    function cancelListing(uint256 listingId) external {
+    function updateListingStatus(uint256 listingId, bool listingStatus)
+        external
+    {
         require(items[listingId].owner == msg.sender, "Unauthorized user");
-        items[listingId].isForSale = false;
-        emit listingCancelled(items[listingId]);
+        items[listingId].isForSale = listingStatus;
+        emit listingUpdated(items[listingId]);
     }
 
     function createOffer(uint256 listingId, uint256 amount) external {

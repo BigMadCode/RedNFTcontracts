@@ -128,23 +128,33 @@ contract("Marketplace Test", function (accounts) {
     expect(offer.isOfferOpen).to.be.equal(true);
 
     let cancelOffer = await instance.cancelOffer(0, { from: anotherAccount });
-    expect(cancelListing.logs[0].event).to.be.equal("listingCancelled");
+    expect(cancelOffer.logs[0].event).to.be.equal("offerCancelled");
 
     let updatedOffer = await instance.getOfferById(0);
     expect(updatedOffer.isOfferOpen).to.be.equal(false);
   });
 
-  it("#6 it is possible to cancel listing", async () => {
+  it("#6 it is possible to cancel listing and then again enable", async () => {
     let instance = this.redMarketplace;
     let item = await instance.getListingById(0);
     expect(item.isForSale).to.be.equal(true);
 
-    let cancelListing = await instance.cancelListing(0, { from: recipient });
+    let cancelListing = await instance.updateListingStatus(0, false, {
+      from: recipient,
+    });
 
-    expect(cancelListing.logs[0].event).to.be.equal("listingCancelled");
+    expect(cancelListing.logs[0].event).to.be.equal("listingUpdated");
 
     let updatedItem = await instance.getListingById(0);
-    expect(updatedItem.isForSale).to.be.equal(false);
+
+    let enableListing = await instance.updateListingStatus(0, true, {
+      from: recipient,
+    });
+
+    expect(enableListing.logs[0].event).to.be.equal("listingUpdated");
+
+    updatedItem = await instance.getListingById(0);
+    expect(updatedItem.isForSale).to.be.equal(true);
   });
 
   // it('#4 it is possible to cancel offer', async () => {
