@@ -40,7 +40,10 @@ contract RedMarketplace {
     mapping(uint256 => Offer) private offers;
 
     event itemAdded(ListingItem item);
+    event listingCancelled(ListingItem item);
     event itemSold();
+    event offerCreated(Offer offer);
+    event offerCancelled(Offer offer);
 
     modifier OnlyItemOwner(address tokenAddress, uint256 tokenId) {
         IERC721 nftContract = IERC721(tokenAddress);
@@ -100,6 +103,7 @@ contract RedMarketplace {
     function cancelListing(uint256 listingId) external {
         require(items[listingId].owner == msg.sender, "Unauthorized user");
         items[listingId].isForSale = false;
+        emit listingCancelled(items[listingId]);
     }
 
     function createOffer(uint256 listingId, uint256 amount) external {
@@ -121,11 +125,13 @@ contract RedMarketplace {
         uint256 royalty = (amount * listing.royalty) / 100;
         redToken.approve(items[listingId].owner, amount - royalty);
         redToken.approve(redMinterAddress, royalty);
+        emit offerCreated(offer);
     }
 
     function cancelOffer(uint256 offerId) external {
         require(offers[offerId].creator == msg.sender, "Unauthorized user");
         offers[offerId].isOfferOpen = false;
+        emit offerCancelled(offers[offerId]);
     }
 
     function getAllowance(address offerCreator) public view returns (uint256) {
@@ -190,5 +196,9 @@ contract RedMarketplace {
         returns (ListingItem memory)
     {
         return items[listingId];
+    }
+
+    function getOfferById(uint256 offerId) public view returns (Offer memory) {
+        return offers[offerId];
     }
 }
