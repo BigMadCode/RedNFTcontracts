@@ -53,7 +53,7 @@ contract('Marketplace Test', function (accounts) {
 		let instance = this.redMarketplace;
 		let nftInstance = await NFTContract.deployed();
 		let balanceRecipient = await nftInstance.balanceOf(recipient);
-		console.log(balanceRecipient.toString() + ' this is balance of Recipient before Mint');
+		console.log(balanceRecipient.toString() + ' this is balance of Recipient before Mint test 3');
 		let askingPrice = 10;
 		let NFT = await expect(nftInstance.safeMint(recipient, 'www.redeyedcollection.com/')).to.eventually.be
 			.fulfilled;
@@ -65,7 +65,7 @@ contract('Marketplace Test', function (accounts) {
 		console.log(nftAddress + ' This is the NFT address');
 		console.log(nftInstance.address);
 
-		console.log(balanceRecipient1.toString() + ' this is balance of Recipient1 after Mint');
+		console.log(balanceRecipient1.toString() + ' this is balance of Recipient1 after Mint test 3');
 		let listedItem = await expect(
 			instance.listItem(nftTokenId, nftAddress, askingPrice, true, recipient, {
 				from: recipient,
@@ -78,6 +78,7 @@ contract('Marketplace Test', function (accounts) {
 
 		item = listedItem.logs[0].args.item;
 		let updatedItem = await instance.getListingById(item.itemId);
+		console.log(updatedItem);
 
 		expect(updatedItem.askingPrice).to.be.equal('20');
 	});
@@ -95,7 +96,7 @@ contract('Marketplace Test', function (accounts) {
 		console.log(depBalance2.toString() + ' This is Deployers balance post transfer');
 		console.log(anotherNewBalance.toString() + ' this is acct 3 balance after RED transfer');
 		let offer = await instance.createOffer(1, 15, { from: anotherAccount });
-		console.log(offer);
+		//console.log(offer);
 	});
 
 	//   it("#4 it is possible to make an offer", async () => {
