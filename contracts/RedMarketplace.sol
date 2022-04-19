@@ -124,9 +124,9 @@ contract RedMarketplace {
             true
         );
         offers[offerId] = offer;
-        uint256 royalty = (amount * listing.royalty) / 100;
-        redToken.approve(items[listingId].owner, amount - royalty);
-        redToken.approve(redMinterAddress, royalty);
+        //uint256 royalty = (amount * listing.royalty) / 100;
+        require(redToken.allowance(offer.creator, address(this)) > amount, "insufficient allowance, re-initialize wallet");
+        //redToken.approve(redMinterAddress, royalty);
         emit offerCreated(offer);
     }
 
