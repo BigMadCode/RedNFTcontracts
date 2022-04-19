@@ -31,7 +31,6 @@ contract("Marketplace Test", function (accounts) {
     console.log(
       balanceRecipient.toString() + " this is balance of Recipient before Mint"
     );
-    let redInstance = await Token.deployed();
     let askingPrice = 10;
     let NFT = await expect(
       nftInstance.safeMint(recipient, "www.redeyedcollection.com/")
@@ -95,15 +94,22 @@ contract("Marketplace Test", function (accounts) {
 
   it("#4 it is possible to make an offer", async () => {
     let instance = this.redMarketplace;
-    let balanceOfDeployer = await instance.balanceOf(deployerAccount);
-
-    expect(instance.transfer(recipient, new BN(balanceOfDeployer + 1))).to
-      .eventually.be.rejected;
-
-    expect(
-      instance.balanceOf(deployerAccount)
-    ).to.eventually.be.a.bignumber.equal(balanceOfDeployer);
+    let redInstance = await Token.deployed();
+    let offer = await instance.createOffer(1, 15, { from: anotherAccount });
+    console.log(offer);
   });
+
+  //   it("#4 it is possible to make an offer", async () => {
+  //     let instance = this.redMarketplace;
+  //     let balanceOfDeployer = await instance.balanceOf(deployerAccount);
+
+  //     expect(instance.transfer(recipient, new BN(balanceOfDeployer + 1))).to
+  //       .eventually.be.rejected;
+
+  //     expect(
+  //       instance.balanceOf(deployerAccount)
+  //     ).to.eventually.be.a.bignumber.equal(balanceOfDeployer);
+  //   });
 
   // it('#4 it is possible to cancel offer', async () => {
   // 	let instance = this.myToken;
