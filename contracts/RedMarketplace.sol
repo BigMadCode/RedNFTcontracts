@@ -19,7 +19,7 @@ contract RedMarketplace {
         address payable owner;
         uint256 askingPrice;
         bool isForSale;
-        uint256 royalty;
+        uint256 listingFee;
     }
 
     struct Offer {
@@ -75,9 +75,9 @@ contract RedMarketplace {
     {
         require(askingPrice > 0, "Price must be at least 1 RED");
         uint256 listingId = _listingIdCounter.current();
-        uint256 royalty = 10;
+        uint256 listingFee = 10;
         if (msg.sender == redMinterAddress) {
-            royalty = 30;
+            listingFee = 30;
         }
         ListingItem memory listing = ListingItem(
             listingId,
@@ -86,7 +86,7 @@ contract RedMarketplace {
             payable(owner),
             askingPrice,
             isForSale,
-            royalty
+            listingFee
         );
         items[listingId] = listing;
         _listingIdCounter.increment();
@@ -125,12 +125,12 @@ contract RedMarketplace {
             true
         );
         offers[offerId] = offer;
-        //uint256 royalty = (amount * listing.royalty) / 100;
+        //uint256 listingFee = (amount * listing.listingFee) / 100;
         require(
             redToken.allowance(offer.creator, address(this)) > amount,
             "insufficient allowance, re-initialize wallet"
         );
-        //redToken.approve(redMinterAddress, royalty);
+        //redToken.approve(redMinterAddress, listingFee);
         emit offerCreated(offer);
     }
 
@@ -153,13 +153,13 @@ contract RedMarketplace {
             offer.amount <= getAllowance(offer.creator),
             "Token transfer not approved by the offer creator"
         );
-        uint256 royalty = (offer.amount * listing.royalty) / 100;
+        uint256 listingFee = (offer.amount * listing.listingFee) / 100;
         redToken.transferFrom(
             offer.creator,
             listing.owner,
-            offer.amount - royalty
+            offer.amount - listingFee
         );
-        redToken.transferFrom(offer.creator, address(this), royalty);
+        redToken.transferFrom(offer.creator, address(this), listingFee);
         IERC721(_nftContract).safeTransferFrom(
             msg.sender,
             offer.creator,
@@ -182,13 +182,13 @@ contract RedMarketplace {
             redToken.balanceOf(msg.sender) >= listing.askingPrice,
             "Insufficient RED token balance"
         );
-        uint256 royalty = (listing.askingPrice * listing.royalty) / 100;
+        uint256 listingFee = (listing.askingPrice * listing.listingFee) / 100;
         redToken.transferFrom(
             msg.sender,
             listing.owner,
-            listing.askingPrice - royalty
+            listing.askingPrice - listingFee
         );
-        redToken.transferFrom(msg.sender, address(this), royalty);
+        redToken.transferFrom(msg.sender, address(this), listingFee);
 
         IERC721(_nftContract).safeTransferFrom(
             listing.owner,
