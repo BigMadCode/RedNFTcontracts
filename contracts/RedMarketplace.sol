@@ -140,7 +140,11 @@ contract RedMarketplace {
         emit offerCancelled(offers[offerId]);
     }
 
-    function getAllowance(address offerCreator) public view returns (uint256) {
+    function getAllowance(address offerCreator)
+        internal
+        view
+        returns (uint256)
+    {
         return redToken.allowance(offerCreator, address(this));
     }
 
