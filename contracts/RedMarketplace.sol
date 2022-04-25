@@ -112,11 +112,13 @@ contract RedMarketplace {
     function createOffer(uint256 listingId, uint256 amount) external {
         ListingItem storage listing = items[listingId];
         require(listing.isForSale, "Listed item is NOT accepting offers");
+        require(listing.owner != msg.sender, "Owner cannot create offer");
         require(
             redToken.balanceOf(msg.sender) >= listing.askingPrice,
             "Insufficient RED token balance"
         );
         uint256 offerId = _offerIdCounter.current();
+        _offerIdCounter.increment();
         Offer memory offer = Offer(
             offerId,
             msg.sender,
