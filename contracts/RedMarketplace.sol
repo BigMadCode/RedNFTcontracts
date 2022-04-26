@@ -101,11 +101,17 @@ contract RedMarketplace {
         items[listingId].askingPrice = askingPrice;
     }
 
-    function updateListingStatus(uint256 listingId, bool listingStatus)
-        external
-    {
+    function updateListingStatus(
+        uint256 listingId,
+        bool listingStatus,
+        uint256 askingPrice
+    ) external {
         require(items[listingId].owner == msg.sender, "Unauthorized user");
+        require(askingPrice > 0, "Price must be at least 1 RED");
+
         items[listingId].isForSale = listingStatus;
+        items[listingId].askingPrice = askingPrice;
+
         emit listingUpdated(items[listingId]);
     }
 
@@ -172,6 +178,7 @@ contract RedMarketplace {
             listing.tokenId
         );
         items[offer.itemId].owner = payable(offer.creator);
+        items[offer.itemId].isForSale = false;
         emit itemSold(items[offer.itemId]);
         emit offerAccepted(offers[offerId]);
     }
@@ -202,6 +209,7 @@ contract RedMarketplace {
             listing.tokenId
         );
         items[listingId].owner = payable(msg.sender);
+        items[listingId].isForSale = false;
         emit itemSold(items[listingId]);
     }
 

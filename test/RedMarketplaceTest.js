@@ -149,7 +149,7 @@ contract("Marketplace Test", function (accounts) {
     let item = await instance.getListingById(0);
     expect(item.isForSale).to.be.equal(true);
 
-    let cancelListing = await instance.updateListingStatus(0, false, {
+    let cancelListing = await instance.updateListingStatus(0, false, 10, {
       from: recipient,
     });
 
@@ -157,7 +157,7 @@ contract("Marketplace Test", function (accounts) {
 
     let updatedItem = await instance.getListingById(0);
 
-    let enableListing = await instance.updateListingStatus(0, true, {
+    let enableListing = await instance.updateListingStatus(0, true, 10, {
       from: recipient,
     });
 
