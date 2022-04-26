@@ -12,7 +12,9 @@ module.exports = async function (deployer) {
       .deploy(RedMarketplace, instanceRed.address)
       .then((instanceMP) => {
         console.log("Marketplace address " + instanceMP.address);
-        return deployer.deploy(RedNFT, instanceMP.address);
+        return deployer.deploy(RedNFT, instanceMP.address).then((x) => {
+          return deployer.deploy(RedGovernance, instanceRed.address);
+        });
       });
   });
 };

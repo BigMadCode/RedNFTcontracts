@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RedGovernance {
     IERC20 redToken;
-    address admin = 0xC76EBCe384181d22de0d5E8f9552c0bbbd2E95cc; // TODO
-    uint256 votingFee = 100 * 10**18; // TODO
-    uint256 votingReward = 15 * 10**18; // TODO
+    address admin = address(this); // TODO
+    uint256 votingFee = 100; // TODO
+    uint256 votingReward = 15; // TODO
     uint256 internal rewardPerHour = 1000; // TODO
 
     struct Stake {
@@ -33,10 +33,10 @@ contract RedGovernance {
     function vote() external returns (bool) {
         StakingSummary memory summary = hasStake(msg.sender);
         require(
-            summary.total_amount >= 10000000 * (10**18),
+            summary.total_amount >= 10000000,
             "Please stake atleast 10M Red tokens to vote"
         );
-        redToken.transfer(admin, votingFee);
+        redToken.transferFrom(msg.sender, admin, votingFee);
         StakingInfo[msg.sender].governanceReward =
             summary.governanceReward +
             votingReward;
@@ -56,7 +56,7 @@ contract RedGovernance {
 
     function stake(uint256 _amount) external returns (bool) {
         require(_amount > 0, "Insufficient staking amount");
-        redToken.transfer(admin, _amount);
+        redToken.transferFrom(msg.sender, admin, _amount);
         uint256 timestamp = block.timestamp;
         Stake memory newStake = Stake(msg.sender, _amount, timestamp, 0);
         StakingInfo[msg.sender].stakes.push(newStake);
