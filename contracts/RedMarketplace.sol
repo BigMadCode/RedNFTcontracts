@@ -30,14 +30,18 @@ contract RedMarketplace {
         bool isOfferOpen;
     }
 
+    address deployerAccount;
+
     constructor(address redTokenAddress) {
         redToken = IERC20(redTokenAddress); // Token Address
+        deployerAccount = msg.sender;
     }
 
     Counters.Counter private _listingIdCounter;
     Counters.Counter private _offerIdCounter;
     mapping(uint256 => ListingItem) private items;
     mapping(uint256 => Offer) private offers;
+    mapping(address => bool) private isBlacklisted;
 
     event itemAdded(ListingItem item);
     event listingUpdated(ListingItem item);
@@ -73,6 +77,7 @@ contract RedMarketplace {
         OnlyItemOwner(tokenAddress, tokenId)
         HasTransferApproval(tokenAddress, tokenId)
     {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         require(askingPrice > 0, "Price must be at least 1 RED");
         uint256 listingId = _listingIdCounter.current();
         uint256 listingFee = 10;
@@ -96,6 +101,7 @@ contract RedMarketplace {
     function updateAskingPrice(uint256 listingId, uint256 askingPrice)
         external
     {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         require(items[listingId].owner == msg.sender, "Unauthorized user");
         require(askingPrice > 0, "Price must be at least 1 RED");
         items[listingId].askingPrice = askingPrice;
@@ -106,6 +112,7 @@ contract RedMarketplace {
         bool listingStatus,
         uint256 askingPrice
     ) external {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         require(items[listingId].owner == msg.sender, "Unauthorized user");
         require(askingPrice > 0, "Price must be at least 1 RED");
 
@@ -116,6 +123,7 @@ contract RedMarketplace {
     }
 
     function createOffer(uint256 listingId, uint256 amount) external {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         ListingItem storage listing = items[listingId];
         require(listing.isForSale, "Listed item is NOT accepting offers");
         require(listing.owner != msg.sender, "Owner cannot create offer");
@@ -143,6 +151,7 @@ contract RedMarketplace {
     }
 
     function cancelOffer(uint256 offerId) external {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         require(offers[offerId].creator == msg.sender, "Unauthorized user");
         offers[offerId].isOfferOpen = false;
         emit offerCancelled(offers[offerId]);
@@ -157,6 +166,7 @@ contract RedMarketplace {
     }
 
     function acceptOffer(address _nftContract, uint256 offerId) external {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         Offer storage offer = offers[offerId];
         ListingItem storage listing = items[offer.itemId];
         require(listing.owner == msg.sender, "Unauthorized user");
@@ -188,6 +198,7 @@ contract RedMarketplace {
         uint256 listingId,
         uint256 amount
     ) external {
+        require(!isBlacklisted[msg.sender], "User is blacklisted");
         ListingItem storage listing = items[listingId];
         require(listing.isForSale, "Listed item is NOT for sale");
         require(amount >= listing.askingPrice, "Insufficient RED token amount");
@@ -211,6 +222,11 @@ contract RedMarketplace {
         items[listingId].owner = payable(msg.sender);
         items[listingId].isForSale = false;
         emit itemSold(items[listingId]);
+    }
+
+    function updateBlacklistUser(address userAddress, bool status) external {
+        require(deployerAccount == msg.sender, "Unauthorized account");
+        isBlacklisted[userAddress] = status;
     }
 
     function getListingById(uint256 listingId)
