@@ -10,7 +10,6 @@ contract RedMarketplace {
     using Counters for Counters.Counter;
 
     IERC20 redToken;
-    address redMinterAddress = 0x01Dc00E095788275224187812B3f92f5eF8dD069; // TODO
 
     struct ListingItem {
         uint256 itemId;
@@ -63,7 +62,7 @@ contract RedMarketplace {
     }
 
     function getRedMinterAddress() public view returns (address) {
-        return redMinterAddress;
+        return deployerAccount;
     }
 
     function listItem(
@@ -81,7 +80,7 @@ contract RedMarketplace {
         require(askingPrice > 0, "Price must be at least 1 RED");
         uint256 listingId = _listingIdCounter.current();
         uint256 listingFee = 10;
-        if (msg.sender == redMinterAddress) {
+        if (msg.sender == deployerAccount) {
             listingFee = 30;
         }
         ListingItem memory listing = ListingItem(
@@ -131,6 +130,10 @@ contract RedMarketplace {
             redToken.balanceOf(msg.sender) >= listing.askingPrice,
             "Insufficient RED token balance"
         );
+        require(
+            redToken.allowance(msg.sender, address(this)) > amount,
+            "insufficient allowance, re-initialize wallet"
+        );
         uint256 offerId = _offerIdCounter.current();
         _offerIdCounter.increment();
         Offer memory offer = Offer(
@@ -141,12 +144,6 @@ contract RedMarketplace {
             true
         );
         offers[offerId] = offer;
-        //uint256 listingFee = (amount * listing.listingFee) / 100;
-        require(
-            redToken.allowance(offer.creator, address(this)) > amount,
-            "insufficient allowance, re-initialize wallet"
-        );
-        //redToken.approve(redMinterAddress, listingFee);
         emit offerCreated(offer);
     }
 

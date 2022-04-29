@@ -265,6 +265,11 @@ contract("Marketplace Test", function (accounts) {
         from: recipient,
       })
     ).to.eventually.be.fulfilled;
+
+    await instance.updateListingStatus(0, true, 10, {
+      from: anotherAccount,
+    });
+
     let offer = await instance.createOffer(item.itemId, 15, {
       from: recipient,
     });
