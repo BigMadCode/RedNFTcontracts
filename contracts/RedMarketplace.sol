@@ -30,10 +30,12 @@ contract RedMarketplace {
     }
 
     address deployerAccount;
+    address feeCollectorAccount;
 
     constructor(address redTokenAddress) {
         redToken = IERC20(redTokenAddress); // Token Address
         deployerAccount = msg.sender;
+        feeCollectorAccount = msg.sender;
     }
 
     Counters.Counter private _listingIdCounter;
@@ -131,7 +133,7 @@ contract RedMarketplace {
             "Insufficient RED token balance"
         );
         require(
-            redToken.allowance(msg.sender, address(this)) > amount,
+            redToken.allowance(msg.sender, address(this)) >= amount,
             "insufficient allowance, re-initialize wallet"
         );
         uint256 offerId = _offerIdCounter.current();
@@ -178,7 +180,7 @@ contract RedMarketplace {
             listing.owner,
             offer.amount - listingFee
         );
-        redToken.transferFrom(offer.creator, address(this), listingFee);
+        redToken.transferFrom(offer.creator, feeCollectorAccount, listingFee);
         IERC721(_nftContract).safeTransferFrom(
             msg.sender,
             offer.creator,
@@ -203,14 +205,17 @@ contract RedMarketplace {
             redToken.balanceOf(msg.sender) >= listing.askingPrice,
             "Insufficient RED token balance"
         );
+        require(
+            listing.askingPrice <= getAllowance(msg.sender),
+            "Token transfer not approved by the offer creator"
+        );
         uint256 listingFee = (listing.askingPrice * listing.listingFee) / 100;
         redToken.transferFrom(
             msg.sender,
             listing.owner,
             listing.askingPrice - listingFee
         );
-        redToken.transferFrom(msg.sender, address(this), listingFee);
-
+        redToken.transferFrom(msg.sender, feeCollectorAccount, listingFee);
         IERC721(_nftContract).safeTransferFrom(
             listing.owner,
             msg.sender,
@@ -224,6 +229,15 @@ contract RedMarketplace {
     function updateBlacklistUser(address userAddress, bool status) external {
         require(deployerAccount == msg.sender, "Unauthorized account");
         isBlacklisted[userAddress] = status;
+    }
+
+    function updateFeeCollectorAccount(address walletAddress) external {
+        require(deployerAccount == msg.sender, "Unauthorized account");
+        feeCollectorAccount = walletAddress;
+    }
+
+    function getFeeCollectorAccount() public view returns (address) {
+        return feeCollectorAccount;
     }
 
     function getListingById(uint256 listingId)

@@ -178,11 +178,11 @@ contract("Marketplace Test", function (accounts) {
     });
     let offerId = offer.logs[0].args.offer.offerId;
 
-    let mpBalance = await redInstance.balanceOf(instance.address);
+    let depBalance = await redInstance.balanceOf(deployerAccount);
     let recBalance = await redInstance.balanceOf(recipient);
     let anBalance = await redInstance.balanceOf(anotherAccount);
 
-    expect(mpBalance.toString()).to.be.equal("0");
+    expect(depBalance.toString()).to.be.equal("99999999999999999900000");
     expect(recBalance.toString()).to.be.equal("0");
     expect(anBalance.toString()).to.be.equal("100000");
 
@@ -196,11 +196,11 @@ contract("Marketplace Test", function (accounts) {
       from: recipient,
     });
 
-    mpBalance = await redInstance.balanceOf(instance.address);
+    depBalance = await redInstance.balanceOf(deployerAccount);
     recBalance = await redInstance.balanceOf(recipient);
     anBalance = await redInstance.balanceOf(anotherAccount);
 
-    expect(mpBalance.toString()).to.be.equal("1");
+    expect(depBalance.toString()).to.be.equal("99999999999999999900001");
     expect(recBalance.toString()).to.be.equal("14");
     expect(anBalance.toString()).to.be.equal("99985");
 
@@ -219,11 +219,11 @@ contract("Marketplace Test", function (accounts) {
     let listingId = 1;
     let item = await instance.getListingById(listingId);
 
-    let mpBalance = await redInstance.balanceOf(instance.address);
+    let depBalance = await redInstance.balanceOf(deployerAccount);
     let recBalance = await redInstance.balanceOf(recipient);
     let anBalance = await redInstance.balanceOf(anotherAccount);
 
-    expect(mpBalance.toString()).to.be.equal("1");
+    expect(depBalance.toString()).to.be.equal("99999999999999999900001");
     expect(recBalance.toString()).to.be.equal("14");
     expect(anBalance.toString()).to.be.equal("99985");
 
@@ -237,11 +237,11 @@ contract("Marketplace Test", function (accounts) {
       from: anotherAccount,
     });
 
-    mpBalance = await redInstance.balanceOf(instance.address);
+    depBalance = await redInstance.balanceOf(deployerAccount);
     recBalance = await redInstance.balanceOf(recipient);
     anBalance = await redInstance.balanceOf(anotherAccount);
 
-    expect(mpBalance.toString()).to.be.equal("3");
+    expect(depBalance.toString()).to.be.equal("99999999999999999900003");
     expect(recBalance.toString()).to.be.equal("32");
     expect(anBalance.toString()).to.be.equal("99965");
 
@@ -280,11 +280,11 @@ contract("Marketplace Test", function (accounts) {
     console.log("Balance of " + recipient + " " + nftBalanceRecipient);
     let offerId = offer.logs[0].args.offer.offerId;
 
-    let mpBalance = await redInstance.balanceOf(instance.address);
+    let depBalance = await redInstance.balanceOf(deployerAccount);
     let recBalance = await redInstance.balanceOf(recipient);
     let anBalance = await redInstance.balanceOf(anotherAccount);
 
-    expect(mpBalance.toString()).to.be.equal("3");
+    expect(depBalance.toString()).to.be.equal("99999999999999999900003");
     expect(recBalance.toString()).to.be.equal("32");
     expect(anBalance.toString()).to.be.equal("99965");
 
@@ -300,11 +300,11 @@ contract("Marketplace Test", function (accounts) {
       from: anotherAccount,
     });
 
-    mpBalance = await redInstance.balanceOf(instance.address);
+    depBalance = await redInstance.balanceOf(deployerAccount);
     recBalance = await redInstance.balanceOf(recipient);
     anBalance = await redInstance.balanceOf(anotherAccount);
 
-    expect(mpBalance.toString()).to.be.equal("4");
+    expect(depBalance.toString()).to.be.equal("99999999999999999900004");
     expect(recBalance.toString()).to.be.equal("17");
     expect(anBalance.toString()).to.be.equal("99979");
 
