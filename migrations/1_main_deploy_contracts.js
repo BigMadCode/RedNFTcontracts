@@ -1,11 +1,9 @@
-var RedNFT = artifacts.require("./RedNFT.sol");
-var RedMarketplace = artifacts.require("./RedMarketplace.sol");
+var RedNFT = artifacts.require('./RedNFT.sol');
+var RedMarketplace = artifacts.require('./RedMarketplace.sol');
 
 module.exports = async function (deployer) {
-  deployer
-    .deploy(RedMarketplace, "0x2D001A055B29504D6C029fd4f46470b18D74bd17")
-    .then((instanceMP) => {
-      console.log("Marketplace address " + instanceMP.address);
-      return deployer.deploy(RedNFT, instanceMP.address);
-    });
+	deployer.deploy(RedMarketplace, '0xD708177C3BedC862BAdf69d63a5BCD7E3Dc993bE').then(instanceMP => {
+		console.log('Marketplace address ' + instanceMP.address);
+		return deployer.deploy(RedNFT, instanceMP.address);
+	});
 };
