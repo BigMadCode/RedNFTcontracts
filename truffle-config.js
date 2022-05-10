@@ -28,7 +28,7 @@ module.exports = {
 		goerli_infura: {
 			provider: function () {
 				return new HDWalletProvider(
-					process.env.MNEMONIC,
+					process.env.MNEMONIC2,
 					'https://goerli.infura.io/v3/09fe022bd1da4dd7b44360612349bd93',
 					AccountIndex,
 				);
@@ -46,10 +46,12 @@ module.exports = {
 			network_id: 3,
 		},
 		testnet: {
+			//networkCheckTimeout: 10000,
 			provider: () =>
 				new HDWalletProvider(process.env.MNEMONIC2, `https://data-seed-prebsc-1-s1.binance.org:8545`),
 			network_id: 97,
 			confirmations: 10,
+			networkCheckTimeout: 1000000,
 			timeoutBlocks: 200,
 			skipDryRun: true,
 		},
